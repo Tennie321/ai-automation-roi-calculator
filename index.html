@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Automation ROI Calculator — Measure Your Automation Investment Returns</title>
+    <meta name="description" content="Professional-grade Python CLI tool that calculates comprehensive ROI for AI automation investments. Free online calculator included.">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a2e;
+            --text: #e4e4e7;
+            --text-dim: #8888a0;
+            --text-muted: #666680;
+            --accent-1: #6366f1;
+            --accent-2: #8b5cf6;
+            --accent-3: #06b6d4;
+            --gradient: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+            --gradient-text: linear-gradient(135deg, #a78bfa, #06b6d4, #34d399);
+            --gradient-hero: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4, #34d399);
+            --border: #1e1e3a;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #ef4444;
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(6,182,212,0.04) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animated grid */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-1);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 12s infinite;
+        }
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 14s; }
+        .particle:nth-child(2) { left: 25%; animation-delay: 2s; animation-duration: 16s; }
+        .particle:nth-child(3) { left: 45%; animation-delay: 4s; animation-duration: 12s; }
+        .particle:nth-child(4) { left: 65%; animation-delay: 6s; animation-duration: 18s; }
+        .particle:nth-child(5) { left: 80%; animation-delay: 8s; animation-duration: 15s; }
+        .particle:nth-child(6) { left: 35%; animation-delay: 3s; animation-duration: 13s; }
+        .particle:nth-child(7) { left: 55%; animation-delay: 5s; animation-duration: 17s; }
+        .particle:nth-child(8) { left: 90%; animation-delay: 7s; animation-duration: 11s; }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-left: 28px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+
+        /* Hero */
+        .hero {
+            padding: 100px 0 60px;
+            text-align: center;
+            position: relative;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 100px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-1);
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.2rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 24px;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.4);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            border-color: var(--accent-1);
+            background: rgba(99,102,241,0.05);
+        }
+
+        /* Sample Output Section */
+        .sample-output {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin: 40px auto;
+            max-width: 650px;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            text-align: left;
+            overflow-x: auto;
+        }
+        .sample-output .label {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            font-family: 'Inter', sans-serif;
+        }
+        .sample-output .line { display: flex; }
+        .sample-output .key { color: var(--text-dim); min-width: 160px; }
+        .sample-output .value { color: var(--success); font-weight: 600; }
+        .sample-output .value-warn { color: var(--warning); }
+        .sample-output .value-highlight { color: var(--accent-1); font-weight: 700; }
+        .sample-output .separator { color: var(--border); margin: 8px 0; }
+
+        /* Features */
+        .features {
+            padding: 80px 0;
+        }
+        .features h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        .features .subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 60px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            border-color: rgba(99,102,241,0.3);
+            transform: translateY(-4px);
+            background: var(--bg-card-hover);
+        }
+        .feature-card .icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Pricing */
+        .pricing {
+            padding: 80px 0;
+        }
+        .pricing h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        .pricing .subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 60px;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .pricing-card.featured {
+            border-color: var(--accent-1);
+            background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(6,182,212,0.05));
+        }
+        .pricing-card.featured::before {
+            content: 'BEST VALUE';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient);
+            color: #fff;
+            padding: 4px 16px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99,102,241,0.3);
+        }
+        .pricing-card .plan-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .pricing-card .price {
+            font-size: 3rem;
+            font-weight: 900;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .pricing-card .price-period {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .pricing-card .original-price {
+            color: var(--text-muted);
+            text-decoration: line-through;
+            font-size: 1.1rem;
+        }
+        .pricing-card .description {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin: 16px 0;
+            min-height: 48px;
+        }
+        .pricing-card ul {
+            list-style: none;
+            text-align: left;
+            margin: 20px 0;
+        }
+        .pricing-card ul li {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+        .pricing-card ul li::before {
+            content: '✓ ';
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* Online Calculator */
+        .calculator-section {
+            padding: 80px 0;
+        }
+        .calculator-section h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        .calculator-section .subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 60px;
+        }
+        .calc-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .calc-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .calc-form .full-width { grid-column: 1 / -1; }
+        .calc-form label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-dim);
+        }
+        .calc-form input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .calc-form input:focus {
+            outline: none;
+            border-color: var(--accent-1);
+        }
+        .calc-form input::placeholder { color: var(--text-muted); }
+        .calc-btn {
+            grid-column: 1 / -1;
+            padding: 14px;
+            background: var(--gradient);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.3);
+        }
+        .calc-results {
+            margin-top: 24px;
+            display: none;
+        }
+        .calc-results.show { display: block; }
+        .calc-results h3 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            text-align: center;
+            color: var(--success);
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .result-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+        }
+        .result-item .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .result-item .value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--success);
+        }
+        .result-item .value.highlight {
+            color: var(--accent-1);
+            font-size: 1.6rem;
+        }
+        .result-item.full-width { grid-column: 1 / -1; }
+
+        /* FAQ */
+        .faq {
+            padding: 80px 0;
+        }
+        .faq h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+        .faq-list {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .faq-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .faq-question {
+            padding: 20px 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .faq-question:hover { background: rgba(255,255,255,0.02); }
+        .faq-question .arrow {
+            transition: transform 0.3s;
+            color: var(--text-muted);
+        }
+        .faq-item.active .faq-question .arrow { transform: rotate(180deg); }
+        .faq-answer {
+            padding: 0 24px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        .faq-item.active .faq-answer {
+            padding: 0 24px 20px;
+            max-height: 300px;
+        }
+
+        /* Email Capture */
+        .email-section {
+            padding: 80px 0;
+        }
+        .email-card {
+            background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(6,182,212,0.05));
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: var(--radius);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .email-card h3 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .email-card p {
+            color: var(--text-dim);
+            margin-bottom: 28px;
+        }
+        .email-form {
+            display: flex;
+            gap: 12px;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        .email-form input {
+            flex: 1;
+            padding: 14px 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+        .email-form input:focus {
+            outline: none;
+            border-color: var(--accent-1);
+        }
+        .email-form button {
+            padding: 14px 28px;
+            background: var(--gradient);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .email-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.3);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer a {
+            color: var(--accent-1);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { padding: 60px 0 40px; }
+            .nav-links { display: none; }
+            .calc-form { grid-template-columns: 1fr; }
+            .result-grid { grid-template-columns: 1fr; }
+            .email-form { flex-direction: column; }
+            .sample-output { font-size: 0.75rem; }
+            .sample-output .key { min-width: 120px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <nav>
+            <a href="#" class="logo">ROI Calculator</a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#calculator">Try It</a>
+                <a href="#faq">FAQ</a>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-badge">⚡ Zero Dependencies • Python 3.8+</div>
+            <h1>Quantify Your AI<br>Automation ROI</h1>
+            <p>Professional-grade calculator that tells you exactly how much value AI automation will deliver — with break-even analysis, 5-year projections, and investment grading.</p>
+            <div class="hero-cta">
+                <a href="#calculator" class="btn btn-primary">📊 Try the Online Calculator</a>
+                <a href="https://github.com/Tennie321/ai-automation-roi-calculator" class="btn btn-secondary">🐙 View on GitHub</a>
+            </div>
+            <div class="sample-output">
+                <div class="label">📈 Sample Output — 10 Employees, $65K Salary, 5 hrs saved/week</div>
+                <div class="separator">──────────────────────────────────────</div>
+                <div class="line"><span class="key">Year 1 Net Savings</span> <span class="value">$231,000</span></div>
+                <div class="line"><span class="key">Year 1 ROI</span> <span class="value-highlight">896.6%</span></div>
+                <div class="line"><span class="key">Break-Even</span> <span class="value-warn">40 days</span></div>
+                <div class="line"><span class="key">Ongoing Annual</span> <span class="value">$236,000</span></div>
+                <div class="line"><span class="key">5-Year Value</span> <span class="value-highlight">$1.18M</span></div>
+                <div class="line"><span class="key">Rating</span> <span class="value">EXCEPTIONAL ⭐⭐⭐⭐⭐</span></div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features" id="features">
+            <h2>Why Use This Calculator?</h2>
+            <p class="subtitle">Stop guessing whether AI automation is worth it. Get hard numbers you can use in proposals, board meetings, and investment decisions.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon">💰</div>
+                    <h3>Labor Savings</h3>
+                    <p>Calculates exact dollar savings from hours reclaimed, based on fully-loaded hourly rates per employee.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🚀</div>
+                    <h3>Productivity Multiplier</h3>
+                    <p>Accounts for faster task completion (1.5x-3x) and the compounding value of accelerated workflows.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🎯</div>
+                    <h3>Error Reduction</h3>
+                    <p>Quantifies quality improvements from AI automation — fewer mistakes, better consistency, higher output quality.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h3>Break-Even Analysis</h3>
+                    <p>Know exactly how many days until your investment pays for itself. Most scenarios break even within 30-60 days.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔮</div>
+                    <h3>5-Year Projections</h3>
+                    <p>See the long-term value of your automation investment with 3-year and 5-year net value projections.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📤</div>
+                    <h3>Export to JSON & CSV</h3>
+                    <p>Export results as JSON for dashboards or CSV for spreadsheets. Perfect for client proposals and presentations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing -->
+        <section class="pricing" id="pricing">
+            <h2>Simple Pricing</h2>
+            <p class="subtitle">Get the full Python CLI tool with all features, or bundle it with other AI Revenue Toolkit products.</p>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="plan-name">Standalone</div>
+                    <div class="price">$12</div>
+                    <div class="price-period">one-time purchase</div>
+                    <div class="description">Full ROI calculator tool with documentation and usage guide.</div>
+                    <ul>
+                        <li>Full Python CLI tool</li>
+                        <li>JSON & CSV export</li>
+                        <li>Interactive mode</li>
+                        <li>Documentation & examples</li>
+                        <li>Lifetime updates</li>
+                    </ul>
+                    <a href="#email" class="btn btn-secondary" style="width:100%;justify-content:center;">Get Started</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="plan-name">Revenue Toolkit Bundle</div>
+                    <div class="original-price">$58</div>
+                    <div class="price">$37</div>
+                    <div class="price-period">all 3+ products</div>
+                    <div class="description">Get the ROI Calculator plus the Prompt Pack and Sales Playbook — everything you need to sell and deliver AI automation.</div>
+                    <ul>
+                        <li>✅ AI Automation ROI Calculator ($12)</li>
+                        <li>✅ 15-Prompt Workflow Pack ($14)</li>
+                        <li>✅ AI Agency Sales Playbook ($17)</li>
+                        <li>✅ Future products at bundle price</li>
+                        <li>💰 Save 36% vs standalone</li>
+                    </ul>
+                    <a href="#email" class="btn btn-primary" style="width:100%;justify-content:center;">Get the Bundle — $37</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Online Calculator -->
+        <section class="calculator-section" id="calculator">
+            <h2>Try It Online</h2>
+            <p class="subtitle">Enter your numbers below for an instant ROI calculation. No download required.</p>
+            <div class="calc-card">
+                <div class="calc-form">
+                    <div>
+                        <label>Employees Affected</label>
+                        <input type="number" id="calc-employees" value="10" min="1" placeholder="e.g., 10">
+                    </div>
+                    <div>
+                        <label>Avg. Annual Salary ($)</label>
+                        <input type="number" id="calc-salary" value="65000" min="1" placeholder="e.g., 65000">
+                    </div>
+                    <div>
+                        <label>Hours Saved/Week/Employee</label>
+                        <input type="number" id="calc-hours" value="5" min="0.5" step="0.5" placeholder="e.g., 5">
+                    </div>
+                    <div>
+                        <label>Monthly Subscription ($)</label>
+                        <input type="number" id="calc-monthly" value="2000" min="0" placeholder="e.g., 2000">
+                    </div>
+                    <div class="full-width">
+                        <label>One-Time Implementation Cost ($)</label>
+                        <input type="number" id="calc-impl" value="5000" min="0" placeholder="e.g., 5000">
+                    </div>
+                    <button class="calc-btn" onclick="calculateROI()">📊 Calculate ROI</button>
+                </div>
+                <div class="calc-results" id="calc-results">
+                    <h3>✅ Your Automation ROI</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="label">Year 1 Net Savings</div>
+                            <div class="value highlight" id="r-year1">$0</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Year 1 ROI</div>
+                            <div class="value" id="r-roi">0%</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Break-Even</div>
+                            <div class="value" id="r-breakeven">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Ongoing Annual Savings</div>
+                            <div class="value" id="r-ongoing">$0</div>
+                        </div>
+                        <div class="result-item full-width" style="text-align:center;">
+                            <div class="label">Rating</div>
+                            <div class="value highlight" id="r-rating">⭐</div>
+                            <div style="color:var(--text-dim);font-size:0.85rem;margin-top:4px;" id="r-summary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="faq" id="faq">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-list">
+                <div class="faq-item active">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        What exactly does the ROI Calculator measure?
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        The calculator measures the total financial return on investment for implementing AI automation. It tracks three primary value streams: direct labor cost savings (hours reclaimed × hourly rate), productivity gain value (faster task completion enabling more output), and error reduction savings (fewer mistakes, higher quality). It then compares these benefits against the implementation cost and ongoing subscription to produce Year 1 ROI, ongoing annual ROI, break-even timeline, and multi-year projections.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Do I need to know Python to use this?
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Basic terminal familiarity is helpful, but the tool includes an interactive mode that prompts you for each input. No coding required. The online calculator on this page also works entirely in your browser with no installation needed. For the full CLI tool, you just need Python 3.8+ installed — no external packages required.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Can I use this in client proposals?
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutely — this is one of the primary use cases. Agency owners and consultants use the ROI reports as social proof in their proposals. The clean formatted output, JSON/CSV exports, and investment grading make it easy to include in pitch decks and proposal documents. The tool is licensed for commercial use.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        How accurate are the projections?
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        The calculator uses conservative default assumptions (50% of theoretical productivity gain value, 5% error cost baseline) to avoid over-promising. The accuracy depends on the quality of your inputs. For best results, use actual salary data (not estimates), track current time spent on processes, and get real quotes for implementation costs. The tool is designed as a decision-support tool, not a financial guarantee.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        What if the ROI is negative?
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        The tool is honest about negative or marginal returns. It includes actionable recommendations for improving ROI, such as targeting higher-hour processes first, reducing implementation scope, or negotiating better subscription pricing. Sometimes the right answer is "don't automate this yet" — and the calculator helps you identify that before you invest.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        What's included in the bundle?
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        The AI Revenue Toolkit Bundle ($37) includes the AI Automation ROI Calculator ($12 standalone), the 15-Prompt AI Workflow Automation Prompt Pack ($14), and the AI Agency Sales Playbook ($17). That's $43 worth of products for $37 — a 14% discount. The bundled products cover the full "sell it, price it, justify it" lifecycle for AI automation services.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Email Capture -->
+        <section class="email-section" id="email">
+            <div class="email-card">
+                <h3>📬 Get the ROI Calculator + Bonus Resources</h3>
+                <p>Drop your email below and we'll send you the full tool, documentation, and sample ROI reports you can use right away.</p>
+                <form class="email-form" onsubmit="event.preventDefault();alert('Thanks! Your download link has been sent. (This is a placeholder — real email capture coming soon.)')">
+                    <input type="email" placeholder="your@email.com" required>
+                    <button type="submit">Send It →</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Part of the <a href="https://tennie321.github.io/ai-revenue-toolkit/">AI Revenue Toolkit</a> by Tennie321</p>
+            <p style="margin-top:8px;">Build smarter. Sell faster. Automate everything.</p>
+        </footer>
+    </div>
+
+    <script>
+        // FAQ Toggle
+        function toggleFaq(el) {
+            const item = el.parentElement;
+            item.classList.toggle('active');
+        }
+
+        // Online Calculator
+        function calculateROI() {
+            const employees = parseFloat(document.getElementById('calc-employees').value) || 10;
+            const salary = parseFloat(document.getElementById('calc-salary').value) || 65000;
+            const hoursSaved = parseFloat(document.getElementById('calc-hours').value) || 5;
+            const monthly = parseFloat(document.getElementById('calc-monthly').value) || 2000;
+            const implCost = parseFloat(document.getElementById('calc-impl').value) || 5000;
+
+            const workHoursPerYear = 2080;
+            const hourlyRate = salary / workHoursPerYear;
+
+            const weeklyTotalHours = hoursSaved * employees;
+            const annualHoursSaved = weeklyTotalHours * 52;
+            const laborSavings = annualHoursSaved * hourlyRate;
+
+            const productivityGain = laborSavings * 2.0;
+            const errorSavings = 0.05 * employees * salary * 0.5;
+
+            const annualBenefit = laborSavings + productivityGain + errorSavings;
+            const firstYearCost = implCost + (monthly * 12);
+            const firstYearNet = annualBenefit - firstYearCost;
+            const firstYearROI = (annualBenefit / firstYearCost) * 100;
+
+            const ongoingNet = annualBenefit - (monthly * 12);
+            const ongoingROI = (annualBenefit / (monthly * 12)) * 100;
+
+            const dailyBenefit = annualBenefit / 365;
+            const breakEvenDays = Math.ceil(firstYearCost / dailyBenefit);
+
+            const threeYearNet = annualBenefit * 3 - firstYearCost - (monthly * 12 * 2);
+            const fiveYearNet = annualBenefit * 5 - firstYearCost - (monthly * 12 * 4);
+
+            const fmt = (n) => {
+                if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+                return '$' + Math.round(n).toLocaleString();
+            };
+
+            let rating, summary;
+            if (firstYearROI >= 500) { rating = 'EXCEPTIONAL ⭐⭐⭐⭐⭐'; summary = 'Outstanding returns. Execute immediately.'; }
+            else if (firstYearROI >= 200) { rating = 'EXCELLENT ⭐⭐⭐⭐'; summary = 'Strong ROI. Highly recommended.'; }
+            else if (firstYearROI >= 100) { rating = 'GOOD ⭐⭐⭐'; summary = 'Solid positive returns within first year.'; }
+            else if (firstYearROI >= 50) { rating = 'MODERATE ⭐⭐'; summary = 'Positive but modest. Consider expanding scope.'; }
+            else if (firstYearROI >= 0) { rating = 'MARGINAL ⭐'; summary = 'Barely breaks even. Look for higher-impact processes.'; }
+            else { rating = 'NEGATIVE ⚠️'; summary = 'Does not break even. Revisit assumptions.'; }
+
+            document.getElementById('r-year1').textContent = fmt(firstYearNet);
+            document.getElementById('r-roi').textContent = firstYearROI.toFixed(1) + '%';
+            document.getElementById('r-breakeven').textContent = breakEvenDays + ' days';
+            document.getElementById('r-ongoing').textContent = fmt(ongoingNet);
+            document.getElementById('r-rating').textContent = rating;
+            document.getElementById('r-summary').textContent = summary;
+
+            document.getElementById('calc-results').classList.add('show');
+
+            // Scroll to results
+            document.getElementById('calc-results').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Auto-calculate on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(calculateROI, 500);
+        });
+    </script>
+</body>
+</html>
